@@ -57,9 +57,9 @@ class ClosedLoop:
         elif self.duty <= self.min_lim:
             self.duty = self.min_lim 
             
-        self.position.append(self.Measured_Vector)
-        self.time.append(Time)
-        
+        #self.position.append(self.Measured_Vector)
+        #self.time.append(Time)
+        #print(self.duty)
         return self.duty
     
     def print_lists(self):
