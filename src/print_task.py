@@ -39,7 +39,6 @@ from micropython import const
 PT_BUF_SIZE = const (3000)
 
 
-@micropython.native
 def put (a_string):
     """!
     Put a string into the print queue so it can be printed by the printing 
@@ -58,7 +57,6 @@ def put (a_string):
 #             print_task.go ()
 
 
-@micropython.native
 def put_bytes (b_arr):
     """!
     Put bytes from a @c bytearray or @c bytes into the print queue. When 
@@ -106,7 +104,7 @@ print_queue = task_share.Queue ('B', PT_BUF_SIZE, name = "Print Queue",
 # This test code is only run when this file is used as the main file; it isn't
 # run when the file is imported as a module
 if __name__ == "__main__":
-    import utime
+    import time
     import task_share
     from micropython import const
     from pyb import USB_VCP
