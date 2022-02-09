@@ -1,5 +1,5 @@
 """
-    @file           TP_motor.py
+    @file           motor_Ruiz_Martos.py
     @brief          Driver class that sets up and controls motors.
     @details        Defines methods used to enable, disable and control the speed of the motors.
     @author         Dylan Ruiz

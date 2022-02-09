@@ -18,6 +18,7 @@ import task_share
 import closedloop
 import encoder_Ruiz_Martos
 import motor_Ruiz_Martos
+import print_task
 
 def task_Encoder ():
     """!
@@ -42,7 +43,7 @@ def task_controller_motor ():
     motor1 = motor_Ruiz_Martos.Motor(enableA,in1_mot,in2_mot,3) # motor in A
     motor1.enable()
     Gain = 0.5
-    step = 4000
+    step = 8000
     Closed_loop = closedloop.ClosedLoop(Gain, 0)
     time_now = 0
     time_start = time.ticks_ms()
@@ -50,7 +51,7 @@ def task_controller_motor ():
         time_now = time.ticks_diff(time.ticks_ms(),time_start)
         pos = position1_share.get()
         motor1.set_duty(Closed_loop.update(step,pos,time_now))
-        print(pos)
+        print_queue.put ("Encoder Pos: {:d}\r\n".format (pos))
 
             
         yield (0)
@@ -68,7 +69,6 @@ if __name__ == "__main__":
                            name = "Queue 0")
     
     position1_share = task_share.Share('i', thread_protect = False, name = "Position 1")
-    
 
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
@@ -83,12 +83,18 @@ if __name__ == "__main__":
     cotask.task_list.append (task2)
     """
     
-    taskE = cotask.Task(task_Encoder, name = 'Task_Encoder', priority = 1,
+    taskE = cotask.Task(task_Encoder, name = 'Task_Encoder', priority = 2,
                         period = 5, profile = True, trace = False)
     taskC = cotask.Task(task_controller_motor, name = 'Task_Motor_Controller',
-                        priority = 0, period = 10, profile = True, trace = False)
+                        priority = 1, period = 10, profile = True, trace = False)
     cotask.task_list.append(taskE)
     cotask.task_list.append(taskC)
+    
+    #print task code
+    print_task = cotask.Task (print_task_function, name = 'Printing', 
+                          priority = 0, profile = True)
+    cotask.task_list.append (print_task)
+
     
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
