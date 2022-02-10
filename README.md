@@ -11,6 +11,6 @@
 ![alt text](period_20ms.png)
 ### Figures 1-3
  These first three images show us playing around with the period of the motor task. We had access to one flywheel during this test to find when the period was too large for the controller to reach a steady value. All gain values are set at 0.5. The first image that steadys out is what we expect with a 10ms period. The second image at 15ms, shows that potentially the tasks are getting a little slow and it took close to 2.5 times as long to steady out. The third picture at 20ms shows that this period is too large to reach steady state and is unsteady.
-### Figure 4
 ![alt text](kp_0.5.png)
+### Figure 4
  This last image shows the functionality of the Task Scheduler with two motors hooked up with a gain of 0.5 and task period of 10ms. 
