@@ -1,13 +1,12 @@
 """!
-@file basic_tasks.py
-    This file contains a demonstration program that runs some tasks, an
-    inter-task shared variable, and a queue. The tasks don't really @b do
-    anything; the example just shows how these elements are created and run.
-
-@author JR Ridgely
-@date   2021-Dec-15 JRR Created from the remains of previous example
-@copyright (c) 2015-2021 by JR Ridgely and released under the GNU
-    Public License, Version 2. 
+    @file           main.py
+    @brief          Task implementation for step responses for two motors.
+    @details        Implements co-task implementation using the cotask file.   
+                    Produces and prints out step response results for both motors. 
+                    Tasks are implemented as generators.
+    @author         Dylan Ruiz
+    @author         Lucas Martos-Repath
+    @date           February 9, 2022
 """
 
 import gc
@@ -23,7 +22,8 @@ from micropython import const
 
 def task_Encoder1():
     """!
-    Task which takes things out of a queue and share to display.
+    Task which initializes and updates encoder 1. 
+    Continuously writes the encoder position to the shared variable.
     """
     in1_enc = pyb.Pin(pyb.Pin.cpu.B6)
     in2_enc = pyb.Pin(pyb.Pin.cpu.B7)
@@ -35,7 +35,8 @@ def task_Encoder1():
         
 def task_Encoder2():
     """!
-    Task which takes things out of a queue and share to display.
+    Task which initializes and updates encoder 2. 
+    Continuously writes the encoder position to the shared variable.
     """
     in1_enc = pyb.Pin(pyb.Pin.cpu.C6)
     in2_enc = pyb.Pin(pyb.Pin.cpu.C7)
@@ -47,7 +48,9 @@ def task_Encoder2():
 
 def task_controller_motor1 ():
     """!
-    Task which puts things into a share and a queue.
+    Task which initializes motor 1. 
+    Controller object updates the duty cycle to the motor and allows closed loop proportional control.
+    Continuously prints the position and time for the data to be processed.
     """
      # CREATING MOTOR AND ENCODER OBJECTS TO BE USED
     enableA = pyb.Pin(pyb.Pin.cpu.A10, pyb.Pin.OUT_PP)
@@ -80,7 +83,9 @@ def task_controller_motor1 ():
             
 def task_controller_motor2 ():
     """!
-    Task which puts things into a share and a queue.
+    Task which initializes motor 2. 
+    Controller object updates the duty cycle to the motor and allows closed loop proportional control.
+    Continuously prints the position and time for the data to be processed.
     """
      # CREATING MOTOR AND ENCODER OBJECTS TO BE USED
     enableB = pyb.Pin(pyb.Pin.cpu.C1, pyb.Pin.OUT_PP)
@@ -113,15 +118,11 @@ def task_controller_motor2 ():
 
     
 if __name__ == "__main__":
-    #print ('\033[2JTesting ME405 stuff in cotask.py and task_share.py\r\n'
-           #'Press ENTER to stop and show diagnostics.')
-
+   
+    #prints the start flag used to notify when to start reading the data lines.
     print("111\r\n")
 
-    # Create a share and a queue to test function and diagnostic printouts
-    share0 = task_share.Share ('h', thread_protect = False, name = "Share 0")
-    q0 = task_share.Queue ('L', 16, thread_protect = False, overwrite = False,
-                           name = "Queue 0")
+    # Creates shares objects used to share the position between tasks.
     
     position1_share = task_share.Share('i', thread_protect = False, name = "Position 1")
     position2_share = task_share.Share('i', thread_protect = False, name = "Position 2")
@@ -130,15 +131,6 @@ if __name__ == "__main__":
     # allocated for state transition tracing, and the application will run out
     # of memory after a while and quit. Therefore, use tracing only for 
     # debugging and set trace to False when it's not needed
-    """
-    task1 = cotask.Task (task1_fun, name = 'Task_1', priority = 1, 
-                         period = 400, profile = True, trace = False)
-    task2 = cotask.Task (task2_fun, name = 'Task_2', priority = 2, 
-                         period = 1500, profile = True, trace = False)
-    cotask.task_list.append (task1)
-    cotask.task_list.append (task2)
-    """
-    
     taskE1 = cotask.Task(task_Encoder1, name = 'Task_Encoder', priority = 2,
                         period = 5, profile = True, trace = False)
     taskE2 = cotask.Task(task_Encoder2, name = 'Task_Encoder', priority = 2,

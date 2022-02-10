@@ -1,3 +1,14 @@
+"""!
+@file           task_share.py
+                This file contains classes which allow tasks to share data without the risk
+                of data corruption by interrupts. 
+@author         JR Ridgely
+@date           2017-Jan-01 JRR Approximate date of creation of file
+@date           2021-Dec-18 JRR Docstrings changed to work without DoxyPyPy
+@copyright      This program is copyright (c) 2017-2021 by JR Ridgely and released
+                under the GNU Public License, version 3.0. 
+"""
+
 import array
 import gc
 import pyb

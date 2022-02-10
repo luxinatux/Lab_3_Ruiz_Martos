@@ -34,11 +34,6 @@ def plot():
             
             if b == 111:
                 break
-        '''
-        for i in range(10):
-            b = s_port.readline()
-            print(b)
-          '''  
                
         asb = s_port.readline()      
         completition = 0
@@ -79,69 +74,23 @@ def plot():
                     y2_list.append(pos2)
             
             
-        #print(mixed_output)
-        #final = len(mixed_output)
-        
-        #s_port.write(b'L1\r') #endline? 
-        
-        #bytearray('hi', 'utf8')
-        #bytearray('hi\r', 'utf8')
+       
         s_port.write(b'\r\n') #runs the main function
     s_port.close() #This made our code the only consistent repeatable output
-    '''
-    x_list = []
-    y_list = []
-    state = 0
-    for i in range(final):
-
-        if state == 0:
-            try: 
-                pos_1 = int(mixed_output[i])
-            except ValueError:
-                Fault_1 = False
-                pass
-            else: 
-                Fault_1 = True
-            state = 1
-            if Fault_1 == True:
-                pos_fin = pos_1
-            continue
-                
-        if state == 1:
-            try: 
-                tim_1 = int(mixed_output[i])
-            except ValueError:
-                Fault_2 = False
-                pass
-            else: 
-                Fault_2 = True
-            state = 0
-            
-            if Fault_2 == True and Fault_1 == True:
-                tim_fin = tim_1
-                x_list.append(tim_fin)
-                y_list.append(pos_fin)
-    '''
-                
-                
-    #print(x_list)
-    #print(y_list)
-
-    #https://matplotlib.org/stable/tutorials/introductory/pyplot.html
+     
 
 
     #plotting of the data commences here
-    plt.plot(x1_list,y1_list)
+    plt.plot(x1_list,y1_list,x2_list,y2_list)
     plt.xlabel("Time[ms]")
     plt.ylabel("Position[ticks]")
     plt.title("Step Response 1, period = 15ms") #title is changed for various plots
     
-    """
+    '''
     plt.plot(x2_list,y2_list)
     plt.xlabel("Time[ms]")
     plt.ylabel("Position[ticks]")
     plt.title("Step Response 2, Kp = 0.5") #title is changed for various plots
-    """
-
+'''
 if __name__ == '__main__':
     plot()

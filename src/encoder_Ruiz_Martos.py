@@ -11,12 +11,12 @@ import pyb
 import time
 
 class Encoder:
-    '''
+    '''!
         @brief                  Interface with quadrature encoders.
         @details                Defines functions used to interface with the encoder.
     '''
     def __init__(self, chanA, chanB, timer):
-        '''
+        '''!
             @brief              Constructs an Encoder object
             @details            Attaches pins and timers, configures channels
                                 and sets the value of parameters to be used
@@ -56,7 +56,7 @@ class Encoder:
         self.stop_1 = 0
         
     def update(self):
-        '''
+        '''!
             @brief              Updates encoder position and delta
             @details            Updated the encoder position and delta, as well
                                 as accounting for overflow
@@ -77,7 +77,7 @@ class Encoder:
         
         
     def get_position(self):
-        '''
+        '''!
             @brief              Returns encoder position
             @details            Returns the position of the encoder based on
                                 the results of the update() fcn
@@ -87,7 +87,7 @@ class Encoder:
         return self.pos_1
     
     def set_position(self, position):
-        '''
+        '''!
             @brief              Sets encoder position
             @details            Sets the encoder position to the desired
                                 user input
@@ -100,7 +100,7 @@ class Encoder:
         
         
     def get_delta(self):
-        '''
+        '''!
             @brief              Returns encoder delta
             @details            Returns the change in position of the encoder
                                 based on the results from the update() fcn
@@ -110,9 +110,7 @@ class Encoder:
         return self.delta_1
         
 if __name__ == '__main__':
-    '''
-    Initialization of pin objects must be done in main
-    '''
+
     in1 = pyb.Pin(pyb.Pin.cpu.B6)
     in2 = pyb.Pin(pyb.Pin.cpu.B7)
     
