@@ -22,11 +22,12 @@ from micropython import const
 
 def task_Encoder1():
     """!
-    Task which initializes and updates encoder 1. 
-    Continuously writes the encoder position to the shared variable.
+    @brief    Task which initializes and updates encoder 1. 
+    @details  Continuously writes the encoder position to the shared variable position1_share.
     """
     in1_enc = pyb.Pin(pyb.Pin.cpu.B6)
     in2_enc = pyb.Pin(pyb.Pin.cpu.B7)
+    ## The encoder for Motor 1
     encoder1 = encoder_Ruiz_Martos.Encoder(in1_enc,in2_enc,4) # motor in A
     while True:
         encoder1.update()
@@ -35,8 +36,8 @@ def task_Encoder1():
         
 def task_Encoder2():
     """!
-    Task which initializes and updates encoder 2. 
-    Continuously writes the encoder position to the shared variable.
+    @brief    Task which initializes and updates encoder 2. 
+    @details  Continuously writes the encoder position to the shared variable position2_share.
     """
     in1_enc = pyb.Pin(pyb.Pin.cpu.C6)
     in2_enc = pyb.Pin(pyb.Pin.cpu.C7)
@@ -48,9 +49,10 @@ def task_Encoder2():
 
 def task_controller_motor1 ():
     """!
-    Task which initializes motor 1. 
-    Controller object updates the duty cycle to the motor and allows closed loop proportional control.
-    Continuously prints the position and time for the data to be processed.
+    @brief     Task which initializes and controlls motor 1. 
+    @details   Controller object updates the duty cycle to the motor and allows closed loop proportional control.
+               Implements a FSM to continuously print the position and time for the data to be processed. After 2000
+               milliseconds, data will stop being processed
     """
      # CREATING MOTOR AND ENCODER OBJECTS TO BE USED
     enableA = pyb.Pin(pyb.Pin.cpu.A10, pyb.Pin.OUT_PP)
@@ -58,16 +60,23 @@ def task_controller_motor1 ():
     in2_mot = pyb.Pin(pyb.Pin.cpu.B5)
     motor1 = motor_Ruiz_Martos.Motor(enableA,in1_mot,in2_mot,3) # motor in A
     motor1.enable()
+    ## Proportional gain for Controller 1
     Gain = 0.5
+    ## Desired output postion of motor 1 in ticks
     step = 8000
+    ## creating closed loop controller
     Closed_loop = closedloop.ClosedLoop(Gain, 0)
+    ## Current time
     time_now = 0
+    ## Initial time on first pass of Task
     time_start = time.ticks_ms()
+    ## FSM state variable
     state = 0
     
     while True:
         if state == 0:
             time_now = time.ticks_diff(time.ticks_ms(),time_start)
+            ## current position from Encoder task
             pos = position1_share.get()
             motor1.set_duty(Closed_loop.update(step,pos,time_now))
             print('M1,{:},{:}'.format(time_now,pos))
@@ -83,9 +92,9 @@ def task_controller_motor1 ():
             
 def task_controller_motor2 ():
     """!
-    Task which initializes motor 2. 
-    Controller object updates the duty cycle to the motor and allows closed loop proportional control.
-    Continuously prints the position and time for the data to be processed.
+    @brief     Task which initializes motor 2. 
+    @details   Controller object updates the duty cycle to the motor and allows closed loop proportional control.
+               Continuously prints the position and time for the data to be processed.
     """
      # CREATING MOTOR AND ENCODER OBJECTS TO BE USED
     enableB = pyb.Pin(pyb.Pin.cpu.C1, pyb.Pin.OUT_PP)
@@ -93,11 +102,17 @@ def task_controller_motor2 ():
     in2_motB = pyb.Pin(pyb.Pin.cpu.A1)
     motor2 = motor_Ruiz_Martos.Motor(enableB,in1_motB,in2_motB,5) # motor in B
     motor2.enable()
+    ## Proportional gain for Controller 2
     Gain = 0.5
+    ## Desired output postion of motor 1 in ticks
     step = 4000
+    ## creating closed loop controller
     Closed_loop = closedloop.ClosedLoop(Gain, 0)
+    ## Current time
     time_now = 0
+    ## Initial time on first pass of Task
     time_start = time.ticks_ms()
+    ## FSM state variable
     state = 0
     
     while True:

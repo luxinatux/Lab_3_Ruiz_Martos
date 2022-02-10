@@ -2,6 +2,8 @@
     @file           Plot.py
     @brief          Data Acquisition file  
     @details        Communicates to the nucleo via serial port to collect step response data and plot it
+                    Runs main.py file on the nucleo via serial port and collects time and location(ticks) data from a step response.
+                    When running on a different computer, ensure that the correct com port number is changed.
     @author         Dylan Ruiz
     @author         Lucas Martos-Repath
 """
@@ -12,9 +14,12 @@ from matplotlib import pyplot as plt
 
 def plot():
     '''!
-        @brief                  Runs main.py file on the nucleo and collects data.     
-        @details                Runs main.py file on the nucleo via serial port and collects time and location(ticks) data from a step response.
-                                When running on a different computer, ensure that the correct com port number is changed.
+        @brief      Runs main.py file on the nucleo and collects data.     
+        @details    This plot function needs to command the nucleo to restart and run main.py. Once the Nucleo
+                    is running it's main file and outputting data, the open serial port uses readline to detect
+                    return carriages. To make our program function most reliably, we had the main.py file output
+                    a 111 to allow us to know when to start taking data. 
+                                
     '''
     with serial.Serial('COM3', 115200) as s_port:
         #joe = ''
@@ -24,6 +29,7 @@ def plot():
         #time.sleep(1)
         s_port.write(b'\x04') #runs the main function
         #time.sleep(2)
+        
         
         while True:
             a = s_port.readline()
@@ -35,13 +41,19 @@ def plot():
             if b == 111:
                 break
                
-        asb = s_port.readline()      
+        asb = s_port.readline() # one extra read line to get to the first piece of data
+        ## Boolean for seeing when data becomes the word "Done"
         completition = 0
+        ## Motor 1 Time Values
         x1_list = []
+        ## Motor 1 Position Values
         y1_list = []
+        ## Motor 2 Time Values
         x2_list = []
+        ## Motor 2 Position Values
         y2_list = []
         while not completition == 1:
+            ## The motor number, the time value, the encoder position or done
             mixed_output = s_port.readline().split(b',')
             print(mixed_output)
             
@@ -81,7 +93,7 @@ def plot():
 
 
     #plotting of the data commences here
-    plt.plot(x1_list,y1_list,x2_list,y2_list)
+    plt.plot(x1_list,y1_list)
     plt.xlabel("Time[ms]")
     plt.ylabel("Position[ticks]")
     plt.title("Step Response 1, period = 15ms") #title is changed for various plots
