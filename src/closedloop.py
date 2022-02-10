@@ -1,4 +1,4 @@
-"""
+"""!
     @file           closedloop.py
     @brief          Driver class implementing a closed loop controller.
     @details        Implements a closed loop P-Only controller for any system.

@@ -1,4 +1,4 @@
-"""
+"""!
     @file           encoder_Ruiz_Martos.py
     @brief          Driver class for encoder project.
     @details        Defines functions used in the task_encoder.

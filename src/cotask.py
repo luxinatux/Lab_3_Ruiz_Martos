@@ -17,7 +17,7 @@ chosen scheduling algorithm such as round-robin or highest-priority-first.
 """
 
 import gc                              # Memory allocation garbage collector
-import time                           # Micropython version of time library
+import utime                           # Micropython version of time library
 import micropython                     # This shuts up incorrect warnings
 
 
@@ -98,7 +98,7 @@ class Task:
         #  @c go() method. 
         if period != None:
             self.period = int (period * 1000)
-            self._next_run = time.ticks_us () + self.period
+            self._next_run = utime.ticks_us () + self.period
         else:
             self.period = period
             self._next_run = None
@@ -116,7 +116,7 @@ class Task:
         # which to store transition (time, to-state) stamps
         self._trace = trace
         self._tr_data = []
-        self._prev_time = time.ticks_us ()
+        self._prev_time = utime.ticks_us ()
 
         ## Flag which is set true when the task is ready to be run by the
         #  scheduler
@@ -139,19 +139,19 @@ class Task:
 
             # If profiling, save the start time
             if self._prof:
-                stime = time.ticks_us ()
+                stime = utime.ticks_us ()
 
             # Run the method belonging to the state which should be run next
             curr_state = next (self._run_gen)
 
             # If profiling or tracing, save timing data
             if self._prof or self._trace:
-                etime = time.ticks_us ()
+                etime = utime.ticks_us ()
 
             # If profiling, save timing data
             if self._prof:
                 self._runs += 1
-                runt = time.ticks_diff (etime, stime)
+                runt = utime.ticks_diff (etime, stime)
                 if self._runs > 2:
                     self._run_sum += runt
                     if runt > self._slowest:
@@ -164,7 +164,7 @@ class Task:
                 try:
                     if curr_state != self._prev_state:
                         self._tr_data.append (
-                            (time.ticks_diff (etime, self._prev_time),
+                            (utime.ticks_diff (etime, self._prev_time),
                              curr_state))
                 except MemoryError:
                     self._trace = False
@@ -191,10 +191,10 @@ class Task:
         # If this task uses a timer, check if it's time to run run() again. If
         # so, set go flag and set the timer to go off at the next run time
         if self.period != None:
-            late = time.ticks_diff (time.ticks_us (), self._next_run)
+            late = utime.ticks_diff (utime.ticks_us (), self._next_run)
             if late > 0:
                 self.go_flag = True
-                self._next_run = time.ticks_diff (self.period, 
+                self._next_run = utime.ticks_diff (self.period, 
                                                    -self._next_run)
 
                 # If keeping a latency profile, record the data
@@ -205,6 +205,19 @@ class Task:
 
         # If the task doesn't use a timer, we rely on go_flag to signal ready
         return self.go_flag
+
+
+    def set_period (self, new_period):
+        """!
+        This method sets the period between runs of the task to the given
+        number of milliseconds, or @c None if the task is triggered by calls
+        to @c go() rather than time.
+        @param new_period The new period in milliseconds between task runs
+        """
+        if new_period is None:
+            self.period = None
+        else:
+            self.period = int (new_period) * 1000
 
 
     def reset_profile (self):
@@ -391,11 +404,3 @@ class TaskList:
 ## This is @b the main task list which is created for scheduling when 
 #  @c cotask.py is imported into a program. 
 task_list = TaskList ()
-
-
-
- 
-        
-        
-
-

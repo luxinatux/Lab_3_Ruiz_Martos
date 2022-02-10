@@ -21,7 +21,7 @@ import motor_Ruiz_Martos
 from micropython import const
 
 
-def task_Encoder ():
+def task_Encoder1():
     """!
     Task which takes things out of a queue and share to display.
     """
@@ -32,8 +32,20 @@ def task_Encoder ():
         encoder1.update()
         position1_share.put(encoder1.get_position())
         yield (0)
+        
+def task_Encoder2():
+    """!
+    Task which takes things out of a queue and share to display.
+    """
+    in1_enc = pyb.Pin(pyb.Pin.cpu.C6)
+    in2_enc = pyb.Pin(pyb.Pin.cpu.C7)
+    encoder2 = encoder_Ruiz_Martos.Encoder(in1_enc,in2_enc,8) # motor in A
+    while True:
+        encoder2.update()
+        position2_share.put(encoder2.get_position())
+        yield (0)
 
-def task_controller_motor ():
+def task_controller_motor1 ():
     """!
     Task which puts things into a share and a queue.
     """
@@ -55,7 +67,7 @@ def task_controller_motor ():
             time_now = time.ticks_diff(time.ticks_ms(),time_start)
             pos = position1_share.get()
             motor1.set_duty(Closed_loop.update(step,pos,time_now))
-            print('{:},{:}'.format(time_now,pos))
+            print('M1,{:},{:}'.format(time_now,pos))
             if time_now >= 2000:
                 state = 1
             yield (0)
@@ -64,12 +76,47 @@ def task_controller_motor ():
             state = 2
             yield(0)
         elif state == 2:
-            yield(0)     
+            yield(0)   
+            
+def task_controller_motor2 ():
+    """!
+    Task which puts things into a share and a queue.
+    """
+     # CREATING MOTOR AND ENCODER OBJECTS TO BE USED
+    enableB = pyb.Pin(pyb.Pin.cpu.C1, pyb.Pin.OUT_PP)
+    in1_motB = pyb.Pin(pyb.Pin.cpu.A0)
+    in2_motB = pyb.Pin(pyb.Pin.cpu.A1)
+    motor2 = motor_Ruiz_Martos.Motor(enableB,in1_motB,in2_motB,5) # motor in B
+    motor2.enable()
+    Gain = 0.5
+    step = 4000
+    Closed_loop = closedloop.ClosedLoop(Gain, 0)
+    time_now = 0
+    time_start = time.ticks_ms()
+    state = 0
+    
+    while True:
+        if state == 0:
+            time_now = time.ticks_diff(time.ticks_ms(),time_start)
+            pos = position2_share.get()
+            motor2.set_duty(Closed_loop.update(step,pos,time_now))
+            print('M2,{:},{:}'.format(time_now,pos))
+            if time_now >= 2000:
+                state = 1
+            yield (0)
+        elif state == 1:
+            print('done\r\n')
+            state = 2
+            yield(0)
+        elif state == 2:
+            yield(0)  
 
     
 if __name__ == "__main__":
     #print ('\033[2JTesting ME405 stuff in cotask.py and task_share.py\r\n'
            #'Press ENTER to stop and show diagnostics.')
+
+    print("111\r\n")
 
     # Create a share and a queue to test function and diagnostic printouts
     share0 = task_share.Share ('h', thread_protect = False, name = "Share 0")
@@ -77,7 +124,7 @@ if __name__ == "__main__":
                            name = "Queue 0")
     
     position1_share = task_share.Share('i', thread_protect = False, name = "Position 1")
-    time1_share = task_share.Share('i', thread_protect = False, name = "Time 1")
+    position2_share = task_share.Share('i', thread_protect = False, name = "Position 2")
 
     # Create the tasks. If trace is enabled for any task, memory will be
     # allocated for state transition tracing, and the application will run out
@@ -92,13 +139,19 @@ if __name__ == "__main__":
     cotask.task_list.append (task2)
     """
     
-    taskE = cotask.Task(task_Encoder, name = 'Task_Encoder', priority = 2,
+    taskE1 = cotask.Task(task_Encoder1, name = 'Task_Encoder', priority = 2,
                         period = 5, profile = True, trace = False)
-    taskC = cotask.Task(task_controller_motor, name = 'Task_Motor_Controller',
+    taskE2 = cotask.Task(task_Encoder2, name = 'Task_Encoder', priority = 2,
+                        period = 5, profile = True, trace = False)
+    taskC1 = cotask.Task(task_controller_motor1, name = 'Task_Motor_Controller',
+                        priority = 1, period = 15, profile = True, trace = False)
+    taskC2 = cotask.Task(task_controller_motor2, name = 'Task_Motor_Controller',
                         priority = 1, period = 10, profile = True, trace = False)
-    cotask.task_list.append(taskE)
-    cotask.task_list.append(taskC)
-        
+    cotask.task_list.append(taskE1)
+    cotask.task_list.append(taskE2)
+    cotask.task_list.append(taskC1)
+    cotask.task_list.append(taskC2)
+    
     # Run the memory garbage collector to ensure memory is as defragmented as
     # possible before the real-time scheduler is started
     gc.collect ()
@@ -115,7 +168,4 @@ if __name__ == "__main__":
     vcp.read ()
     
     # Print a table of task data and a table of shared information data
-    print ('\n' + str (cotask.task_list))
-    print (task_share.show_all ())
-    print (taskE.get_trace ())
-    print ('\r\n')
+    
